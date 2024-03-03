@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.example.codelabnavigation
+package com.example.codelabnavigation.screens.main
 
 import android.content.Context
 import android.content.Intent
@@ -12,62 +12,37 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.*
+import com.example.codelabnavigation.R
 import com.example.codelabnavigation.data.DataSource
+import com.example.codelabnavigation.screens.others.SelectOptionScreen
+import com.example.codelabnavigation.screens.others.StartOrderScreen
+import com.example.codelabnavigation.screens.others.SummaryScreen
 import com.example.codelabnavigation.ui.OrderViewModel
-import com.example.codelabnavigation.ui.SelectOptionScreen
-import com.example.codelabnavigation.ui.StartOrderScreen
-import com.example.codelabnavigation.ui.SummaryScreen
-
-/**
- * enum values that represent the screens in the app
- */
-enum class CupCakeScreen(
-    //Realiza una ruta hacia la carpeta Res del archivo strings
-    @StringRes val title: Int
-) {
+enum class CupCakeScreen(@StringRes val title: Int) {
     Start(title = R.string.app_name),
     Flavor(title = R.string.choose_flavor),
     Pickup(title = R.string.choose_pickup_date),
     Summary(title = R.string.order_summary)
 }
 
-/**
- * Composable that displays the topBar and displays back button if back navigation is possible.
- */
-
 @Composable
 fun CupcakeAppBar(
+    modifier: Modifier = Modifier,
     currentScreen: CupCakeScreen,
     canNavigateBack: Boolean,
-    onNavigateUp: () -> Unit,
-    modifier: Modifier = Modifier
+    onNavigateUp: () -> Unit
 ) {
     TopAppBar(
         title = { Text(stringResource(currentScreen.title)) },
-        colors = TopAppBarDefaults.mediumTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        ),
         modifier = modifier,
         navigationIcon = {
             if (canNavigateBack) {
@@ -78,7 +53,10 @@ fun CupcakeAppBar(
                     )
                 }
             }
-        }
+        },
+        colors = TopAppBarDefaults.mediumTopAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        )
     )
 }
 
@@ -86,13 +64,9 @@ fun CupcakeAppBar(
 fun CupCakeApp(
     viewModel: OrderViewModel = viewModel(),
     navController: NavHostController = rememberNavController()
-){
-    // Get current back stack entry
+) {
     val backStackEntry by navController.currentBackStackEntryAsState()
-    // Get the name of the current screen
-    val currentScreen = CupCakeScreen.valueOf(
-        backStackEntry?.destination?.route?: CupCakeScreen.Start.name
-    )
+    val currentScreen = CupCakeScreen.valueOf(backStackEntry?.destination?.route ?: CupCakeScreen.Start.name)
 
     Scaffold(
         topBar = {
@@ -103,7 +77,6 @@ fun CupCakeApp(
             )
         }
     ) { innerPadding ->
-
         val uiState by viewModel.uiState.collectAsState()
 
         NavHost(
@@ -114,35 +87,33 @@ fun CupCakeApp(
                 .verticalScroll(rememberScrollState())
                 .padding(innerPadding)
         ) {
-            // Primera pantalla de la aplicación para iniciar la orden de cupcakes
             composable(route = CupCakeScreen.Start.name) {
                 StartOrderScreen(
-                    quantityOptions = DataSource.quantityOptions,
-                    onNextButtonClicked = {cupcakeQuantity ->
-                        viewModel.setQuantity(cupcakeQuantity)
-                        navController.navigate(CupCakeScreen.Flavor.name)
-                    },
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(dimensionResource(R.dimen.padding_medium))
+                        .padding(dimensionResource(R.dimen.padding_medium)),
+                    quantityOptions = DataSource.quantityOptions,
+                    onNextButtonClicked = { cupcakeQuantity ->
+                        viewModel.setQuantity(cupcakeQuantity)
+                        navController.navigate(CupCakeScreen.Flavor.name)
+                    }
                 )
             }
 
-            // Segunda pantalla de la aplicación que muestra las opciones de flavors
             composable(route = CupCakeScreen.Flavor.name) {
                 val context = LocalContext.current
                 SelectOptionScreen(
                     modifier = Modifier.fillMaxHeight(),
                     radioButtonList = DataSource.flavors.map { id -> context.resources.getString(id) },
                     currentPrice = uiState.price,
-                    onSelectionChanged = {
-                        newFlavor -> viewModel.setFlavor(newFlavor)
-                    },
-                    onNavigateNext = {
-                        navController.navigate(CupCakeScreen.Pickup.name)
+                    onSelectionChanged = { newFlavor ->
+                        viewModel.setFlavor(newFlavor)
                     },
                     onCancelButtonClicked = {
                         cancelOrderAndNavigateToStart(viewModel, navController)
+                    },
+                    onNavigateNext = {
+                        navController.navigate(CupCakeScreen.Pickup.name)
                     }
                 )
             }
@@ -152,34 +123,35 @@ fun CupCakeApp(
                     modifier = Modifier.fillMaxHeight(),
                     radioButtonList = uiState.pickupOptions,
                     currentPrice = uiState.price,
-                    onSelectionChanged = {
-                        newDate -> viewModel.setDate(newDate)
+                    onSelectionChanged = { newDate ->
+                        viewModel.setDate(newDate)
+                    },
+                    onCancelButtonClicked = {
+                        cancelOrderAndNavigateToStart(viewModel, navController)
                     },
                     onNavigateNext = {
                         navController.navigate(CupCakeScreen.Summary.name)
+                    },
+                )
+            }
+
+            composable(route = CupCakeScreen.Summary.name) {
+                val context = LocalContext.current
+                SummaryScreen(
+                    modifier = Modifier.fillMaxHeight(),
+                    orderUiState = uiState,
+                    onSendButtonClicked = { subject: String, summary: String ->
+                        shareOrder(context, subject = subject, summary = summary)
                     },
                     onCancelButtonClicked = {
                         cancelOrderAndNavigateToStart(viewModel, navController)
                     }
                 )
             }
-
-            composable(route = CupCakeScreen.Summary.name){
-                val context = LocalContext.current
-                SummaryScreen(
-                    modifier = Modifier.fillMaxHeight(),
-                    orderUiState = uiState
-                ){
-                        subject: String, summary: String ->
-                    shareOrder(context, subject = subject, summary = summary)
-                }
-            }
         }
     }
 }
 
-
-// Resetea el estado del [OrderViewModel] y redirige a la pantalla de inicio
 private fun cancelOrderAndNavigateToStart(
     viewModel: OrderViewModel,
     navController: NavHostController
@@ -189,7 +161,6 @@ private fun cancelOrderAndNavigateToStart(
 }
 
 private fun shareOrder(context: Context, subject: String, summary: String) {
-    // Create an ACTION_SEND implicit intent with order details in the intent extras
     val intent = Intent(Intent.ACTION_SEND).apply {
         type = "text/plain"
         putExtra(Intent.EXTRA_SUBJECT, subject)
