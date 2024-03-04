@@ -1,4 +1,4 @@
-package com.example.codelabnavigation.screens.others
+package com.example.codelabnavigation.screens.other
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*

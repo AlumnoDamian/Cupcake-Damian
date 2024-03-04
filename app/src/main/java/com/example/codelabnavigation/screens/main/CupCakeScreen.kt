@@ -2,62 +2,32 @@
 
 package com.example.codelabnavigation.screens.main
 
-import android.content.Context
-import android.content.Intent
 import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import com.example.codelabnavigation.R
 import com.example.codelabnavigation.data.DataSource
-import com.example.codelabnavigation.screens.others.SelectOptionScreen
-import com.example.codelabnavigation.screens.others.StartOrderScreen
-import com.example.codelabnavigation.screens.others.SummaryScreen
+import com.example.codelabnavigation.screens.main.utils.cancelOrderAndNavigateToStart
+import com.example.codelabnavigation.screens.main.utils.shareOrder
+import com.example.codelabnavigation.screens.other.SelectOptionScreen
+import com.example.codelabnavigation.screens.other.StartOrderScreen
+import com.example.codelabnavigation.screens.other.SummaryScreen
 import com.example.codelabnavigation.ui.OrderViewModel
+
 enum class CupCakeScreen(@StringRes val title: Int) {
     Start(title = R.string.app_name),
     Flavor(title = R.string.choose_flavor),
     Pickup(title = R.string.choose_pickup_date),
     Summary(title = R.string.order_summary)
-}
-
-@Composable
-fun CupcakeAppBar(
-    modifier: Modifier = Modifier,
-    currentScreen: CupCakeScreen,
-    canNavigateBack: Boolean,
-    onNavigateUp: () -> Unit
-) {
-    TopAppBar(
-        title = { Text(stringResource(currentScreen.title)) },
-        modifier = modifier,
-        navigationIcon = {
-            if (canNavigateBack) {
-                IconButton(onClick = onNavigateUp) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.back_button)
-                    )
-                }
-            }
-        },
-        colors = TopAppBarDefaults.mediumTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        )
-    )
 }
 
 @Composable
@@ -70,7 +40,7 @@ fun CupCakeApp(
 
     Scaffold(
         topBar = {
-            CupcakeAppBar(
+            CupCakeAppBar(
                 currentScreen = currentScreen,
                 canNavigateBack = navController.previousBackStackEntry != null,
                 onNavigateUp = { navController.navigateUp() }
@@ -150,26 +120,4 @@ fun CupCakeApp(
             }
         }
     }
-}
-
-private fun cancelOrderAndNavigateToStart(
-    viewModel: OrderViewModel,
-    navController: NavHostController
-) {
-    viewModel.resetOrder()
-    navController.popBackStack(CupCakeScreen.Start.name, inclusive = false)
-}
-
-private fun shareOrder(context: Context, subject: String, summary: String) {
-    val intent = Intent(Intent.ACTION_SEND).apply {
-        type = "text/plain"
-        putExtra(Intent.EXTRA_SUBJECT, subject)
-        putExtra(Intent.EXTRA_TEXT, summary)
-    }
-    context.startActivity(
-        Intent.createChooser(
-            intent,
-            context.getString(R.string.new_cupcake_order)
-        )
-    )
 }
