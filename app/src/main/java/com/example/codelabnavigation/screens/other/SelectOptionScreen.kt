@@ -5,14 +5,15 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.sp
 import com.example.codelabnavigation.R
+import com.example.codelabnavigation.screens.components.CancelButton
+import com.example.codelabnavigation.screens.components.NextButton
 
 
 @Composable
@@ -31,118 +32,99 @@ fun SelectOptionScreen(
         modifier = modifier,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
+        /* Columna que contiene la lista de opciones de radio */
         Column(modifier = Modifier.padding(dimensionResource(R.dimen.padding_medium))) {
             radioButtonList.forEach { eachOption: String ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .selectable(
-                            selected = (selectedOption == eachOption),
-                            onClick = {
-                                if (selectedOption == eachOption) {
-                                    selectedOption = null
-                                    showError = true
-                                } else {
-                                    selectedOption = eachOption
-                                    onSelectionChanged(selectedOption.orEmpty())
-                                    showError = false
-                                }
-                            }
-                        )
-                ) {
-                    RadioButton(
-                        selected = (selectedOption == eachOption),
-                        onClick = {
-                            if (selectedOption == eachOption) {
-                                selectedOption = null
-                                showError = true
-                            } else {
-                                selectedOption = eachOption
-                                onSelectionChanged(selectedOption.orEmpty())
-                                showError = false
-                            }
-                        }
-                    )
-                    Text(text = eachOption)
-                }
+                /* Llama a la función RadioOptionList para cada opción de radio */
+                RadioOptionItem(
+                    isSelected = (selectedOption == eachOption),
+                    onSelectionChanged = {
+                        selectedOption = if (selectedOption == eachOption) null else eachOption
+                        showError = (selectedOption == null)
+                        onSelectionChanged(selectedOption.orEmpty())
+                    },
+                    eachOption = eachOption
+                )
             }
 
+            /* Línea divisora entre la lista de opciones de radio y el texto condicional */
             Divider(
                 thickness = dimensionResource(R.dimen.thickness_divider),
                 modifier = Modifier.padding(bottom = dimensionResource(R.dimen.padding_medium))
             )
 
-            ConditionalText(
-                showError,
-                selectedOption.orEmpty(),
-                currentPrice
+            /* Texto condicional que muestra el mensaje de error o los detalles de selección */
+            SelectionDetailsText(
+                showError = showError,
+                selectedOption = selectedOption.orEmpty(),
+                currentPrice = currentPrice
             )
-
         }
 
+        /* Botones de fila (Cancelar y Siguiente) */
         RowButton(
-            onCancelButtonClicked,
-            onNavigateNext,
-            showError
+            onCancelButtonClicked = onCancelButtonClicked,
+            onNavigateNext = onNavigateNext,
+            showError = showError
         )
-
     }
 }
 
 @Composable
-fun ConditionalText(
+private fun RadioOptionItem(
+    isSelected: Boolean,
+    onSelectionChanged: () -> Unit,
+    eachOption: String
+) {
+    /* Fila que contiene el botón de radio y el texto para cada opción */
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .selectable(
+                selected = isSelected,
+                onClick = onSelectionChanged
+            ),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        /* Botón de radio para seleccionar la opción */
+        RadioButton(
+            selected = isSelected,
+            onClick = onSelectionChanged
+        )
+        /* Texto que muestra la opción */
+        Text(text = eachOption)
+    }
+}
+
+@Composable
+fun SelectionDetailsText(
     showError: Boolean,
     selectedOption: String,
     currentPrice: String
-){
-    if (showError) {
-        ErrorText()
-    } else {
-        PriceSelectionText(
-            selectedOption = selectedOption,
-            currentPrice = currentPrice
-        )
-    }
-}
+) {
+    val errorText = "Debe seleccionar una opción primero"
+    val textDetails =
+        buildAnnotatedString {
+            /* Agrega el texto de la selección y el precio con formato */
+            append("Has seleccionado: ")
+            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                append("$selectedOption\n\n")
+            }
+            append("Precio: ")
+            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                append(currentPrice)
+            }
+        }
 
-@Composable
-fun ErrorText(){
+    /* Texto condicional que muestra el mensaje de error o los detalles de selección */
     Text(
-        text = "Debe seleccionar una opción primero",
+        text = if (showError) errorText else textDetails.toString(),
         modifier = Modifier.padding(
             top = dimensionResource(R.dimen.padding_small),
             bottom = dimensionResource(R.dimen.padding_medium)
         ),
-        color = MaterialTheme.colorScheme.error,
-        fontWeight = FontWeight.Bold
-    )
-}
-
-@Composable
-fun PriceSelectionText(
-    selectedOption: String,
-    currentPrice: String
-){
-    Text(
-        buildAnnotatedString {
-            append("Has seleccionado: ")
-            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                append(selectedOption)
-            }
-
-            appendLine()
-            appendLine()
-
-            append("Precio: ")
-            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp)) {
-                append(currentPrice)
-            }
-        },
-        modifier = Modifier.padding(
-            top = dimensionResource(R.dimen.padding_small),
-            bottom = dimensionResource(R.dimen.padding_medium)
-        )
+        color = if (showError) MaterialTheme.colorScheme.error else Color.Black,
+        fontWeight = if (showError) FontWeight.Bold else FontWeight.Normal
     )
 }
 
@@ -152,6 +134,7 @@ fun RowButton(
     onNavigateNext: () -> Unit,
     showError: Boolean
 ) {
+    /* Fila que contiene los botones de Cancelar y Siguiente */
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -159,43 +142,18 @@ fun RowButton(
         horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_medium)),
         verticalAlignment = Alignment.Bottom
     ) {
-        ButtonCancel(
+        /* Botón Cancelar */
+        CancelButton(
             modifier = Modifier.weight(1f),
-            onCancelButtonClicked = onCancelButtonClicked
+            onClick = onCancelButtonClicked,
+            labelResourceId = R.string.cancel,
         )
-        ButtonNext(
+        /* Botón Siguiente con estado habilitado o deshabilitado */
+        NextButton(
             modifier = Modifier.weight(1f),
-            onNavigateNext = onNavigateNext,
-            showError = showError
+            onClick = onNavigateNext,
+            labelResourceId = R.string.next,
+            isEnabled = showError.not()
         )
-    }
-}
-
-@Composable
-fun ButtonCancel(
-    modifier: Modifier = Modifier,
-    onCancelButtonClicked: () -> Unit
-) {
-    OutlinedButton(
-        modifier = modifier,
-        onClick = onCancelButtonClicked
-    ) {
-        Text(stringResource(R.string.cancel))
-    }
-}
-
-@Composable
-fun ButtonNext(
-    modifier: Modifier = Modifier,
-    onNavigateNext: () -> Unit,
-    showError: Boolean
-) {
-    Button(
-        modifier = modifier,
-        onClick = onNavigateNext,
-
-        enabled = showError.not()
-    ) {
-        Text(stringResource(R.string.next))
     }
 }

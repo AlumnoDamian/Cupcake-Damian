@@ -12,24 +12,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import com.example.codelabnavigation.R
 import com.example.codelabnavigation.data.OrderUiState
+import com.example.codelabnavigation.screens.components.CancelButton
 import java.util.Locale
-
 
 @Composable
 fun SummaryScreen(
     modifier: Modifier,
     orderUiState: OrderUiState,
-    onSendButtonClicked: (String, String) -> Unit,
+    onSendButtonClicked: (orderId: String, summary: String) -> Unit,
     onCancelButtonClicked: () -> Unit
 ) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
+        /* Sección de Resumen */
         Column (
             modifier = Modifier.padding(dimensionResource(R.dimen.padding_medium)),
             verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_small))
         ){
+            /* Cantidad */
             Text(stringResource(R.string.quantity).toUpperCase(Locale.getDefault()))
             Text(
                 text = "${orderUiState.quantity}",
@@ -37,6 +39,7 @@ fun SummaryScreen(
             )
             Divider(thickness = dimensionResource(R.dimen.thickness_divider))
 
+            /* Sabor */
             Text(stringResource(R.string.flavor).toUpperCase(Locale.getDefault()))
             Text(
                 text = orderUiState.flavor,
@@ -44,6 +47,7 @@ fun SummaryScreen(
             )
             Divider(thickness = dimensionResource(R.dimen.thickness_divider))
 
+            /* Fecha de recogida */
             Text(stringResource(R.string.pickup_date).toUpperCase(Locale.getDefault()))
             Text(
                 text = orderUiState.date,
@@ -51,6 +55,7 @@ fun SummaryScreen(
             )
             Divider(thickness = dimensionResource(R.dimen.thickness_divider))
 
+            /* Precio total */
             Text(
                 buildAnnotatedString {
                     append(stringResource(R.string.total_price).toUpperCase(Locale.getDefault()))
@@ -62,6 +67,7 @@ fun SummaryScreen(
             )
         }
 
+        /* Sección de Botones */
         Row (
             modifier = Modifier.padding(dimensionResource(R.dimen.padding_medium))
         ) {
@@ -79,12 +85,12 @@ fun SummaryScreen(
                     Text(stringResource(R.string.send))
                 }
 
-                OutlinedButton(
+                /* Button Cancel */
+                CancelButton(
                     modifier = Modifier.fillMaxWidth(),
-                    onClick = { onCancelButtonClicked() }
-                ) {
-                    Text(stringResource(R.string.cancel))
-                }
+                    onClick = onCancelButtonClicked,
+                    labelResourceId = R.string.cancel,
+                )
             }
         }
     }

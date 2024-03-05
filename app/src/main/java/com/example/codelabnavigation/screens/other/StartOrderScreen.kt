@@ -1,9 +1,7 @@
 package com.example.codelabnavigation.screens.other
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,6 +12,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.codelabnavigation.R
+import com.example.codelabnavigation.screens.components.SelectQuantityButton
 
 @Composable
 fun StartOrderScreen(
@@ -25,36 +24,36 @@ fun StartOrderScreen(
         modifier = modifier,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        OrderDetails()
-
-        QuantityOptions(
-            quantityOptions = quantityOptions,
-            onNextButtonClicked = onNextButtonClicked
-        )
+        OrderDetails(modifier = Modifier.fillMaxWidth())
+        QuantityOptions(quantityOptions, onNextButtonClicked)
     }
 }
 
 @Composable
-fun OrderDetails() {
+fun OrderDetails(
+    modifier: Modifier = Modifier
+) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_small))
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_small)),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_medium)))
+        /* CupCake Image */
         Image(
             painter = painterResource(R.drawable.cupcake),
             contentDescription = null,
-            modifier = Modifier
-                .height(200.dp)
-                .width(148.dp)
+            modifier = Modifier.width(300.dp)
         )
+        /* CupCake Image */
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_medium)))
+        /* Title */
         Text(
             text = stringResource(R.string.order_cupcakes),
-            style = MaterialTheme.typography.headlineSmall
+            style = MaterialTheme.typography.headlineSmall,
         )
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_small)))
+        /* Title */
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_medium)))
     }
 }
 
@@ -63,31 +62,13 @@ fun QuantityOptions(
     quantityOptions: List<Pair<Int, Int>> = listOf(),
     onNextButtonClicked : (Int) -> Unit = {}
 ) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium))
-    ) {
-        quantityOptions.forEach { item ->
+    Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_medium))) {
+        quantityOptions.forEach { (labelResourceId, quantity) ->
             SelectQuantityButton(
-                labelResourceId = item.first,
-                onClick = { onNextButtonClicked(item.second) },
                 modifier = Modifier.fillMaxWidth(),
+                labelResourceId = labelResourceId,
+                onClick = { onNextButtonClicked(quantity) },
             )
         }
-    }
-}
-
-@Composable
-fun SelectQuantityButton(
-    modifier: Modifier = Modifier,
-    @StringRes labelResourceId: Int,
-    onClick: () -> Unit
-) {
-    Button(
-        onClick = onClick,
-        modifier = modifier.widthIn(min = 250.dp)
-    ) {
-        Text(stringResource(labelResourceId))
     }
 }
