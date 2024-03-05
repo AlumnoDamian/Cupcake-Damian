@@ -24,13 +24,13 @@ fun StartOrderScreen(
         modifier = modifier,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        OrderDetails(modifier = Modifier.fillMaxWidth())
-        QuantityOptions(quantityOptions, onNextButtonClicked)
+        OrderDetailsSection(modifier = Modifier.fillMaxWidth())
+        QuantityOptionsSection(quantityOptions, onNextButtonClicked)
     }
 }
 
 @Composable
-fun OrderDetails(
+fun OrderDetailsSection(
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -58,7 +58,7 @@ fun OrderDetails(
 }
 
 @Composable
-fun QuantityOptions(
+fun QuantityOptionsSection(
     quantityOptions: List<Pair<Int, Int>> = listOf(),
     onNextButtonClicked : (Int) -> Unit = {}
 ) {

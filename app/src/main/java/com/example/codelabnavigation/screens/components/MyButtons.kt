@@ -1,16 +1,13 @@
 package com.example.codelabnavigation.screens.components
 
 import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import com.example.codelabnavigation.R
 
 @Composable
 fun SelectQuantityButton(
@@ -30,9 +27,9 @@ fun SelectQuantityButton(
 fun ShareOrderButton(
     modifier: Modifier = Modifier,
     @StringRes labelResourceId: Int,
-    onSendButtonClicked: (String, String) -> Unit,
     orderId: String,
-    summary: String
+    summary: String,
+    onSendButtonClicked: (String, String) -> Unit
 ) {
     Button(
         modifier = modifier,
@@ -71,7 +68,7 @@ fun CancelButton(
     onClick: () -> Unit,
     @StringRes labelResourceId: Int,
 ) {
-    Button(
+    OutlinedButton(
         modifier = modifier,
         onClick = onClick,
     ) {

@@ -6,11 +6,14 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
@@ -28,6 +31,32 @@ enum class CupCakeScreen(@StringRes val title: Int) {
     Flavor(title = R.string.choose_flavor),
     Pickup(title = R.string.choose_pickup_date),
     Summary(title = R.string.order_summary)
+}
+
+@Composable
+fun CupCakeAppBar(
+    modifier: Modifier = Modifier,
+    currentScreen: CupCakeScreen,
+    canNavigateBack: Boolean,
+    onNavigateUp: () -> Unit
+) {
+    TopAppBar(
+        title = { Text(stringResource(currentScreen.title)) },
+        modifier = modifier,
+        navigationIcon = {
+            if (canNavigateBack) {
+                IconButton(onClick = onNavigateUp) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.back_button)
+                    )
+                }
+            }
+        },
+        colors = TopAppBarDefaults.mediumTopAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        )
+    )
 }
 
 @Composable
